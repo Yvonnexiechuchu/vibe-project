@@ -310,7 +310,7 @@ function PackingListContent() {
                         e.preventDefault();
                         removeItem(item.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 text-muted hover:text-red-500 transition-all text-lg cursor-pointer"
+                      className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-muted hover:text-red-500 transition-all text-lg cursor-pointer"
                       title="Remove item"
                     >
                       ×
