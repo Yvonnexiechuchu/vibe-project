@@ -80,6 +80,7 @@ function PackingListContent() {
   const [activeCategory, setActiveCategory] = useState<Category>("Essentials");
   const [newItemName, setNewItemName] = useState("");
   const [showMobileCategories, setShowMobileCategories] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   useEffect(() => {
     const length = searchParams.get("length") as TripLength;
@@ -158,6 +159,13 @@ function PackingListContent() {
     setItems((prev) =>
       prev.map((item) => (item.category === activeCategory ? { ...item, packed: !allDone } : item))
     );
+    // Auto-advance to next category when packing (not unpacking)
+    if (!allDone) {
+      const currentIndex = categories.indexOf(activeCategory);
+      if (currentIndex < categories.length - 1) {
+        setActiveCategory(categories[currentIndex + 1]);
+      }
+    }
   };
 
   const downloadList = () => {
@@ -183,6 +191,12 @@ function PackingListContent() {
   const allPacked = items.length > 0 && items.every((i) => i.packed);
   const categoryAllPacked =
     activeCategoryItems.length > 0 && activeCategoryItems.every((i) => i.packed);
+
+  useEffect(() => {
+    if (allPacked) {
+      setShowCompletionModal(true);
+    }
+  }, [allPacked]);
 
   if (items.length === 0) {
     return (
@@ -379,6 +393,41 @@ function PackingListContent() {
           </aside>
         </div>
       </main>
+
+      {/* All Packed Modal */}
+      {showCompletionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-card rounded-2xl shadow-xl max-w-sm w-full p-8 relative text-center">
+            <button
+              onClick={() => setShowCompletionModal(false)}
+              className="absolute top-4 right-4 text-muted hover:text-foreground text-xl cursor-pointer"
+            >
+              ×
+            </button>
+            <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-accent-light flex items-center justify-center">
+              <span className="text-4xl">🎉</span>
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">All Packed!</h3>
+            <p className="text-muted text-sm mb-6">
+              You&apos;ve checked off everything on your packing list. Have a wonderful trip!
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push("/")}
+                className="flex-1 py-3 rounded-xl bg-accent text-white font-medium hover:bg-accent-hover transition-colors cursor-pointer text-sm"
+              >
+                New List
+              </button>
+              <button
+                onClick={() => setShowCompletionModal(false)}
+                className="flex-1 py-3 rounded-xl border border-border text-foreground font-medium hover:bg-accent-light transition-colors cursor-pointer text-sm"
+              >
+                Back to List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
