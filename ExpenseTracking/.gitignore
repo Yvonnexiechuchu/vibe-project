@@ -1,0 +1,12 @@
+.env
+.env.local
+credentials.json
+cache/
+__pycache__/
+*.pyc
+.DS_Store
+node_modules/
+.next/
+public/data/
+.venv/
+*.csv
