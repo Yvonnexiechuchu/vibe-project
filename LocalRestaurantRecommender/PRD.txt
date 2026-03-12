@@ -1,0 +1,528 @@
+Product Requirements Document (PRD) — Local Restaurant Discovery Copilot V1
+
+Product overview
+
+Product name:
+Restaurant Decision Copilot
+
+One-line description:
+A chat-first restaurant discovery app that consolidates Xiaohongshu inspiration [灵感内容], Google place intelligence [地点信息], and decision support [决策支持] into 3–5 confident dining recommendations for users in the DMV area.
+
+Problem statement:
+When users want to pick a restaurant with friends, the current workflow is fragmented:
+
+search Xiaohongshu for new and trendy spots,
+
+search Google Maps for ratings, reviews, and location,
+
+check reservation options,
+
+manually compare multiple places,
+
+decide where to go.
+
+This process is repetitive, slow, and cognitively heavy [认知负担高]. Users want one place to turn inspiration into a confident recommendation.
+
+Goal:
+Reduce restaurant decision time and friction [决策摩擦] by aggregating and summarizing Xiaohongshu + Google-based evidence into a short ranked list.
+
+Target user
+
+Primary user:
+Young urban users in the DMV area who regularly dine out with friends and use Xiaohongshu to discover restaurants.
+
+Core use case:
+A user wants to quickly answer:
+“Where should we eat tonight / this weekend based on our vibe, budget, group size, and location?”
+
+User profile:
+
+socially active,
+
+visually driven,
+
+uses Xiaohongshu for discovery,
+
+uses Google Maps for validation,
+
+values both atmosphere [氛围] and practical details.
+
+Product scope
+
+In scope for V1:
+
+chat-style natural language input [自然语言输入],
+
+structured query extraction [结构化需求解析],
+
+Xiaohongshu search via MCP,
+
+Google-based place details and review signals,
+
+restaurant candidate consolidation [候选合并],
+
+ranking and recommendation engine [推荐排序引擎],
+
+summary report with 3–5 top recommendations,
+
+restaurant detail cards,
+
+links out to map / reservation pages.
+
+Out of scope for V1:
+
+direct reservation booking,
+
+social collaboration / voting,
+
+user accounts beyond basic save history,
+
+automated full itinerary planning,
+
+national/global expansion beyond DMV,
+
+deep personalization model,
+
+full native iOS-only build before validating web MVP.
+
+Product vision
+
+The app should feel like asking Claude:
+“Find me a cute dinner place for 4 in DC this Friday.”
+
+And getting back:
+
+3–5 strong recommendations,
+
+why each one fits,
+
+what the tradeoffs are,
+
+what Xiaohongshu says,
+
+what Google says,
+
+where to reserve.
+
+The product is not just a search engine. It is a restaurant decision copilot [决策助手].
+
+Success metrics
+
+Primary metric:
+Time-to-decision [决策耗时]
+Target: reduce from multi-app manual research to under 3 minutes.
+
+Secondary metrics:
+
+query-to-click rate on recommended restaurants,
+
+percentage of sessions resulting in a shortlist or outbound click,
+
+repeat usage for new dining decisions,
+
+recommendation satisfaction score,
+
+% of sessions where user selects one of the top 3 recommendations.
+
+Qualitative success:
+Users say:
+“This saved me from checking 3 apps myself.”
+
+Core user stories
+
+As a user, I want to type a natural language dining request so I do not need to manually set many filters.
+
+As a user, I want the app to search Xiaohongshu and Google together so I can save time.
+
+As a user, I want a summarized view of each restaurant so I do not need to read dozens of reviews.
+
+As a user, I want 3–5 ranked recommendations with reasons so I can decide faster.
+
+As a user, I want to understand why a restaurant was recommended so I can trust the result.
+
+As a user, I want easy access to maps and reservations so I can take action immediately.
+
+Assumptions for V1
+
+Proceeding with these assumptions:
+
+Xiaohongshu content is accessible through your MCP in a reasonably stable and compliant way.
+
+Google place/review/location data will be the practical validation layer [验证层].
+
+V1 will be built web-first with a mobile-first UI [移动优先界面], with future iOS deployment in mind.
+
+Initial geographic scope is DMV only.
+
+The first persona is group dining / girls dinner / social dining, not all dining scenarios.
+
+Key product principles
+
+Chat-first, not filter-first.
+The product should start from intent [意图], not from a form.
+
+Explainable recommendations [可解释推荐].
+Every recommendation should say why it matched.
+
+Aggregate, then simplify.
+The product should absorb noisy inputs and return a small confident list.
+
+Mobile-first.
+Every design and interaction should work cleanly on phone before desktop refinement.
+
+Production-safe architecture.
+Use Xiaohongshu MCP as a source, but keep recommendation logic independent from any one source.
+
+Functional requirements
+
+A. Query input experience
+The home screen should provide:
+
+a clean chat-style input box,
+
+example prompts,
+
+optional filter chips for cuisine, price, area, group size,
+
+follow-up prompt generation only when needed.
+
+Example prompts:
+“Find a cute brunch spot in Georgetown for 3 under $$.”
+“Girls dinner in DC this Friday, trendy but not too loud.”
+“Best Korean food near Annandale for 5 with easy parking.”
+
+B. Query understanding
+System should extract:
+
+cuisine [菜系],
+
+location / neighborhood [区域],
+
+party size [人数],
+
+occasion [场景],
+
+budget [预算],
+
+vibe / ambiance [氛围],
+
+timing [时间],
+
+reservation preference [订位偏好],
+
+special constraints such as parking, vegetarian, quiet, photogenic.
+
+C. Xiaohongshu search via MCP
+System should:
+
+search relevant Xiaohongshu content using extracted query terms,
+
+identify restaurant names, neighborhoods, cuisines, and notable themes,
+
+detect repeated positive signals such as “great ambiance,” “popular,” “date-night,” “authentic,”
+
+optionally detect caveats such as long wait, noisy, pricey, small portions.
+
+Output from Xiaohongshu layer:
+
+restaurant mentions,
+
+popularity / frequency signals [提及频率],
+
+vibe tags [氛围标签],
+
+summary of sentiment themes [评价主题].
+
+D. Google data enrichment
+For candidate restaurants, system should fetch:
+
+place name,
+
+address,
+
+distance / area,
+
+price level,
+
+rating,
+
+review count,
+
+opening hours if relevant,
+
+website / map link,
+
+reservation link if available,
+
+place types / category.
+
+E. Candidate consolidation
+System should merge entities across Xiaohongshu and Google:
+
+deduplicate restaurants,
+
+match alternate naming formats,
+
+resolve likely same-place collisions,
+
+enrich restaurant profile from both sources.
+
+F. Ranking engine
+System should produce a weighted recommendation score [加权评分].
+
+Suggested factors:
+
+query match score,
+
+vibe match,
+
+cuisine match,
+
+location fit,
+
+budget fit,
+
+review quality,
+
+review volume confidence,
+
+Xiaohongshu popularity / relevance,
+
+reservation friendliness,
+
+novelty / differentiation if needed.
+
+Important:
+The ranking should be deterministic [可控] at the scoring layer, while LLM output should only summarize the result, not invent the rank.
+
+G. Recommendation output
+System returns:
+
+3–5 top recommendations,
+
+one-line reason per recommendation,
+
+notable pros,
+
+notable caveats,
+
+Xiaohongshu summary,
+
+Google summary,
+
+map / reservation actions.
+
+Example recommendation card:
+Restaurant Name
+Neighborhood | $$ | 4.5 stars
+Why it fits:
+Good for girls dinner, strong ambiance, highly mentioned on Xiaohongshu, good Google review confidence.
+Watch out:
+Can be busy on weekends.
+Actions:
+View map | Reserve | Open details
+
+H. Detail page
+Restaurant detail page should include:
+
+restaurant overview,
+
+why it matched the query,
+
+Xiaohongshu insight summary,
+
+Google review summary,
+
+practical info,
+
+outbound links.
+
+Non-functional requirements
+
+Mobile-first responsive design [响应式设计].
+
+Fast perceived performance with loading states [加载态].
+
+Clear fallback behavior if one source is unavailable.
+
+Modular architecture so sources can be swapped later.
+
+iOS-friendly design decisions from day one.
+
+Traceable recommendation logic for debugging and trust.
+
+UX requirements
+
+Home screen:
+
+minimal, clean, Claude-like prompt window,
+
+warm but structured interface,
+
+sample prompts visible,
+
+recent searches optional.
+
+Results screen:
+
+concise query summary at top,
+
+ranked recommendation cards,
+
+expandable explanation,
+
+quick action buttons.
+
+Interaction style:
+
+fewer forms,
+
+more conversational refinement,
+
+minimal clutter,
+
+clear hierarchy of information [信息层级].
+
+Data model (high level)
+
+Entities:
+
+User Query
+
+Parsed Filters
+
+Xiaohongshu Mention
+
+Restaurant Candidate
+
+Enriched Place Profile
+
+Recommendation Result
+
+Saved Shortlist
+
+Each restaurant candidate should store:
+
+canonical name,
+
+alias names,
+
+source references,
+
+location metadata,
+
+cuisine tags,
+
+vibe tags,
+
+Google metrics,
+
+Xiaohongshu metrics,
+
+score breakdown.
+
+Risks and mitigations
+
+Risk 1: Xiaohongshu search quality may be noisy
+Mitigation:
+Use Xiaohongshu mainly for discovery + vibe signal [氛围信号], not as sole truth source.
+
+Risk 2: Entity matching across Xiaohongshu and Google may be messy
+Mitigation:
+Build a dedicated normalization / matching layer [标准化匹配层].
+
+Risk 3: Recommendation quality may feel arbitrary
+Mitigation:
+Show “why recommended” and keep ranking explainable.
+
+Risk 4: Too many candidate results may overwhelm users
+Mitigation:
+Always compress to top 3–5 with optional “see more.”
+
+Risk 5: Future iOS deployment constraints
+Mitigation:
+Use cross-platform stack and avoid web-only architecture decisions.
+
+MVP release criteria
+
+V1 is ready when:
+
+a user can enter a free-text restaurant request,
+
+system can search Xiaohongshu through MCP,
+
+system can enrich candidates with Google data,
+
+system can produce top 3–5 ranked results,
+
+each result includes a clear explanation,
+
+user can click out to map / reservation link,
+
+experience works smoothly on mobile browser.
+
+Future roadmap
+
+V1.5
+
+saved shortlist,
+
+compare mode,
+
+prompt refinement suggestions,
+
+“best for this vibe” quick presets.
+
+V2
+
+collaborative planning with friends,
+
+personalized preference memory [偏好记忆],
+
+screenshot / link ingestion from Xiaohongshu,
+
+neighborhood / distance optimization,
+
+stronger reservation integrations.
+
+V3
+
+native iOS packaging,
+
+recurring recommendations,
+
+social sharing,
+
+preference learning over time.
+
+Recommended V1 positioning
+
+Positioning statement:
+A chat-first restaurant decision app that combines Xiaohongshu discovery with Google validation to help users in the DMV quickly pick where to eat.
+
+Core value proposition:
+Less searching, less comparing, faster confident decisions.
+
+Build recommendation for Claude Code
+
+I recommend you build in this order:
+
+chat UI shell,
+
+mocked result contract,
+
+backend query parser,
+
+Xiaohongshu MCP connector,
+
+Google enrichment layer,
+
+candidate merge + ranking engine,
+
+result cards + detail page,
+
+save/share later.
+
+The most important PM guardrail:
+Do not let the first version become “an AI that searches everything.”
+It should be “a dining decision workflow product” [决策工作流产品].
