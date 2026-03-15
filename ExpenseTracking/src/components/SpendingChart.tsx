@@ -13,7 +13,7 @@ import {
 import DashboardCard from "./DashboardCard";
 
 function formatPeriod(p: string): string {
-  const d = new Date(p);
+  const d = new Date(p + "T00:00:00");
   return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 

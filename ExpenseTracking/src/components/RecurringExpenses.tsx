@@ -20,6 +20,7 @@ export default function RecurringExpenses({ data }: { data: RecurringData[] }) {
             <tr className="border-b border-sand/30">
               <th className="text-left py-2 text-slate-blue font-medium">Merchant</th>
               <th className="text-right py-2 text-slate-blue font-medium">Monthly Avg</th>
+              <th className="text-right py-2 text-slate-blue font-medium">Avg Ticket</th>
               <th className="text-right py-2 text-slate-blue font-medium">Total</th>
               <th className="text-center py-2 text-slate-blue font-medium">Months</th>
             </tr>
@@ -29,6 +30,7 @@ export default function RecurringExpenses({ data }: { data: RecurringData[] }) {
               <tr key={i} className="border-b border-sand/10 hover:bg-cream/50 transition-colors">
                 <td className="py-2 font-medium">{r.Merchant}</td>
                 <td className="py-2 text-right font-mono text-slate-blue">{fmt(r["Monthly Avg"])}</td>
+                <td className="py-2 text-right font-mono text-slate-blue">{fmt(r.Count > 0 ? r.Total / r.Count : 0)}</td>
                 <td className="py-2 text-right font-mono">{fmt(r.Total)}</td>
                 <td className="py-2 text-center">
                   <span className="bg-light-blue/30 text-dark-blue text-xs px-2 py-0.5 rounded-full">{r.Months}mo</span>

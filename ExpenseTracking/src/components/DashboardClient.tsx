@@ -46,6 +46,7 @@ export default function DashboardClient(props: DashboardProps) {
     start: summary.date_range_start,
     end: summary.date_range_end,
   });
+  const [selMonthCount, setSelMonthCount] = useState<number>(0); // 0 = all/week mode
 
   const filtered = useMemo(() => {
     const txns = transactions.filter((t) => {
@@ -162,17 +163,22 @@ export default function DashboardClient(props: DashboardProps) {
         "Monthly Avg": v.total / v.months.size,
       }));
 
-    // Filter trends by month
-    const startMonth = dateRange.start.slice(0, 7);
+    // Filter trends: single-month selection → expand to 3 months for context
     const endMonth = dateRange.end.slice(0, 7);
+    let trendStartMonth = dateRange.start.slice(0, 7);
+    if (selMonthCount === 1) {
+      const [y, m] = endMonth.split("-").map(Number);
+      const d = new Date(y, m - 3, 1); // 2 months before → 3 total
+      trendStartMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    }
     const filteredTrends: Trends = {
       overall: trends.overall.filter((t) => {
         const p = t.Period.slice(0, 7);
-        return p >= startMonth && p <= endMonth;
+        return p >= trendStartMonth && p <= endMonth;
       }),
       by_category: trends.by_category.filter((t) => {
         const p = t.Period.slice(0, 7);
-        return p >= startMonth && p <= endMonth;
+        return p >= trendStartMonth && p <= endMonth;
       }),
     };
 
@@ -186,9 +192,18 @@ export default function DashboardClient(props: DashboardProps) {
       return d >= dateRange.start && d <= dateRange.end;
     });
 
+    // Wider transaction set for CashFlowTrends when single-month
+    const trendTxns = selMonthCount === 1
+      ? transactions.filter((t) => {
+          const m = t["Transaction Date"].slice(0, 7);
+          return m >= trendStartMonth && m <= endMonth;
+        })
+      : txns;
+
     return {
       summary: filteredSummary,
       transactions: txns,
+      trendTransactions: trendTxns,
       categories: filteredCategories,
       merchants: filteredMerchants,
       trends: filteredTrends,
@@ -198,7 +213,7 @@ export default function DashboardClient(props: DashboardProps) {
       paymentMethods: filteredPaymentMethods,
       outliers: filteredOutliers,
     };
-  }, [dateRange, transactions, trends, shared, outliers, summary]);
+  }, [dateRange, selMonthCount, transactions, trends, shared, outliers, summary]);
 
   return (
     <div className="min-h-screen p-6 md:p-8 max-w-[1400px] mx-auto">
@@ -213,7 +228,7 @@ export default function DashboardClient(props: DashboardProps) {
             minDate={summary.date_range_start}
             maxDate={summary.date_range_end}
             activeRange={dateRange}
-            onRangeChange={setDateRange}
+            onRangeChange={(r, mc) => { setDateRange(r); setSelMonthCount(mc); }}
           />
         </div>
       </div>
@@ -226,12 +241,12 @@ export default function DashboardClient(props: DashboardProps) {
       {/* Main dashboard grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <SpendingChart data={filtered.trends.overall} />
-        <CashFlowTrends transactions={filtered.transactions} />
+        <CashFlowTrends transactions={filtered.trendTransactions} />
       </div>
 
       {/* Categories */}
       <div className="mb-6">
-        <CategoryBreakdown data={filtered.categories} />
+        <CategoryBreakdown data={filtered.categories} transactions={filtered.transactions} />
       </div>
 
       {/* Middle row */}
@@ -259,7 +274,7 @@ export default function DashboardClient(props: DashboardProps) {
       </div>
 
       {/* Floating AI buttons */}
-      <FloatingAIPanel />
+      <FloatingAIPanel dateRangeEnd={summary.date_range_end} />
     </div>
   );
 }

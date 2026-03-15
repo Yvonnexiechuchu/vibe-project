@@ -29,7 +29,6 @@ export default function PaymentMethods({ data }: { data: PaymentMethodData[] }) 
               cy="50%"
               outerRadius={80}
               paddingAngle={2}
-              label={({ name, percent }) => { const n = String(name ?? ""); return `${n.slice(0, 12)}${n.length > 12 ? "…" : ""} ${((percent ?? 0) * 100).toFixed(0)}%`; }}
             >
               {chartData.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -38,6 +37,21 @@ export default function PaymentMethods({ data }: { data: PaymentMethodData[] }) 
             <Tooltip
               formatter={(value) => [fmt(Number(value))]}
               contentStyle={{ background: "#fff", border: "1px solid #C4B69C", borderRadius: 12 }}
+            />
+            <Legend
+              layout="vertical"
+              align="right"
+              verticalAlign="middle"
+              iconType="circle"
+              iconSize={8}
+              wrapperStyle={{ fontSize: 11, lineHeight: "18px", maxWidth: "50%", overflow: "hidden" }}
+              formatter={(value: string) => {
+                const total = chartData.reduce((s, d) => s + d.value, 0);
+                const item = chartData.find(d => d.name === value);
+                const pct = item && total > 0 ? ((item.value / total) * 100).toFixed(0) : "0";
+                const label = value.length > 16 ? value.slice(0, 16) + "…" : value;
+                return `${label} ${pct}%`;
+              }}
             />
           </PieChart>
         </ResponsiveContainer>

@@ -37,7 +37,7 @@ export default function CashFlowTrends({ transactions }: { transactions: Transac
   const chartData = Object.entries(monthly)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, v]) => ({
-      name: new Date(month + "-01").toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
+      name: new Date(month + "-01T00:00:00").toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
       income: Math.round(v.income),
       expenses: Math.round(v.expenses),
       net: Math.round(v.income - v.expenses),
