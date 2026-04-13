@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "oauth-setup": "node scripts/oauth-setup.mjs",
+    "create-sheet": "node scripts/create-sheet.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

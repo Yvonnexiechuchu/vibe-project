@@ -14,23 +14,33 @@ Montserrat Bold/ExtraBold, saturated accents.
 - **Tailwind v4** + custom neo-brutalist token system (`globals.css`)
 - **Anthropic Claude** (Opus 4.6) for vision parsing, NL queries, organic research
 - **Google Sheets** as the database — 4 tabs (items, prices, stores, organic_research)
+- **OAuth2 refresh token** for Sheets auth (works around `iam.disableServiceAccountKeyCreation` org policies)
 - **Recharts** for price-history charts
 
 ## Setup
 
-1. Create a Google Cloud project, enable the **Sheets API**, and create a
-   **Service Account**. Download its JSON key.
-2. Create an empty Google Sheet. Share it with the service account email
-   (Editor). Copy the sheet ID from the URL.
-3. Copy `.env.example` → `.env.local` and fill in:
-   - `ANTHROPIC_API_KEY`
-   - `GOOGLE_SHEET_ID`
-   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-   - `GOOGLE_PRIVATE_KEY` (paste the `private_key` value from the JSON — keep
-     the `\n` escape sequences)
-4. `npm install`
-5. `npm run dev` — the first API call to `/api/data` will auto-create the
-   4 tabs and header rows in your Sheet.
+### 1. Anthropic
+1. [console.anthropic.com](https://console.anthropic.com) → Create API Key
+2. `cp .env.example .env.local`, set `ANTHROPIC_API_KEY`
+
+### 2. Google Cloud (one-time)
+1. Pick or create a GCP project
+2. Enable **Google Sheets API**
+3. Configure **OAuth consent screen** (Testing mode is fine for personal use; add yourself as a test user)
+4. **APIs & Services → Credentials → Create OAuth Client ID**
+   - Application type: **Web application**
+   - Authorized redirect URI: `http://localhost:3040/callback`
+5. Paste the Client ID + Secret into `.env.local` as `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
+
+### 3. Install + bootstrap
+```bash
+npm install
+npm run oauth-setup   # browser flow → writes GOOGLE_REFRESH_TOKEN
+npm run create-sheet  # creates the Sheet in your Drive → writes GOOGLE_SHEET_ID
+npm run dev
+```
+
+Open [localhost:3000](http://localhost:3000).
 
 ## App surface
 
@@ -55,6 +65,16 @@ Montserrat Bold/ExtraBold, saturated accents.
 | `POST /api/chat` | `{ question }` → answer string |
 | `POST /api/organic` | `{ category, force? }` → cached or fresh research |
 
-## Deploying
+## Deploying to Vercel
 
-Deploy on Vercel. Add the four env vars in the project settings. `GOOGLE_PRIVATE_KEY` must keep its `\n` escapes when pasted into Vercel.
+Vercel picks up the app from the `GroceryIntelligence/` subfolder of this monorepo.
+
+1. Import the repo in Vercel, set **Root Directory** = `GroceryIntelligence`
+2. Add env vars in Project Settings → Environment Variables:
+   - `ANTHROPIC_API_KEY`
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `GOOGLE_REFRESH_TOKEN`
+   - `GOOGLE_SHEET_ID`
+3. In Google Cloud Console → Credentials → your OAuth client, add the Vercel production URL (e.g. `https://grocery-intelligence.vercel.app`) to Authorized origins if you later add a browser-side auth flow. (Not required for the current server-side-only flow.)
+4. Deploy.

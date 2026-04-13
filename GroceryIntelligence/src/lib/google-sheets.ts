@@ -1,10 +1,12 @@
 /**
  * Google Sheets data layer.
  *
- * The sheet must have 4 tabs matching the headers defined below. On first run
- * `ensureHeaders()` will create the tabs / write the header row if missing —
- * so the user only needs to create an empty sheet and share it with the
- * service account. No manual column setup required.
+ * Auth: OAuth2 refresh token (works even when org policy disables
+ * service-account keys). The app acts on behalf of the user who ran the
+ * one-time `scripts/oauth-setup.mjs` flow.
+ *
+ * `ensureHeaders()` creates the 4 tabs / writes header rows if missing, so
+ * an empty spreadsheet is enough — no manual column setup required.
  */
 
 import { google, sheets_v4 } from "googleapis";
@@ -17,7 +19,7 @@ import type {
   Unit,
 } from "./types";
 
-const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+export const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
 
 type Tab = "items" | "prices" | "stores" | "organic_research";
 
@@ -55,12 +57,13 @@ let cachedSpreadsheetId: string | null = null;
 
 function getClient(): { sheets: sheets_v4.Sheets; spreadsheetId: string } {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
-  if (!spreadsheetId || !email || !privateKey) {
+  if (!spreadsheetId || !clientId || !clientSecret || !refreshToken) {
     throw new Error(
-      "Google Sheets env vars missing. Set GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY."
+      "Google Sheets env vars missing. Set GOOGLE_SHEET_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN."
     );
   }
 
@@ -68,11 +71,8 @@ function getClient(): { sheets: sheets_v4.Sheets; spreadsheetId: string } {
     return { sheets: cachedClient, spreadsheetId };
   }
 
-  const auth = new google.auth.JWT({
-    email,
-    key: privateKey,
-    scopes: SCOPES,
-  });
+  const auth = new google.auth.OAuth2(clientId, clientSecret);
+  auth.setCredentials({ refresh_token: refreshToken });
 
   cachedClient = google.sheets({ version: "v4", auth });
   cachedSpreadsheetId = spreadsheetId;
