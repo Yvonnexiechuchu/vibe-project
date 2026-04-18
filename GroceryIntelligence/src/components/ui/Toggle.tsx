@@ -15,16 +15,19 @@ export function Toggle({ checked, onChange, label, ariaLabel }: Props) {
       aria-checked={checked}
       aria-label={ariaLabel ?? label}
       onClick={() => onChange(!checked)}
-      className="ink-border ink-shadow rounded-full bg-white relative w-[52px] h-[30px] shrink-0 transition-colors"
-      style={{ backgroundColor: checked ? "var(--ink)" : "white" }}
+      className="relative w-[46px] h-[26px] shrink-0 rounded-full border-2 transition-colors duration-200"
+      style={{
+        backgroundColor: checked ? "var(--ink)" : "var(--ink-08)",
+        borderColor: checked ? "var(--ink)" : "var(--ink-30)",
+      }}
     >
       <span
-        className="absolute top-1/2 -translate-y-1/2 rounded-full bg-white ink-border transition-[left] duration-150"
+        className="absolute top-[2px] rounded-full bg-white transition-[left] duration-200"
         style={{
           width: 18,
           height: 18,
-          left: checked ? 28 : 4,
-          backgroundColor: checked ? "white" : "var(--ink)",
+          left: checked ? 23 : 3,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
         }}
       />
     </button>

@@ -10,6 +10,21 @@ import { CameraIcon, UploadIcon, XIcon } from "@/components/Icon";
 import { parseReceipt } from "@/lib/client-api";
 import { saveSession } from "@/lib/receipt-session";
 
+const SUPPORTED_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+const ACCEPT = "image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif";
+
+function normalizeMime(raw: string): string {
+  const t = raw.toLowerCase().trim();
+  if (t === "image/jpg") return "image/jpeg";
+  if (SUPPORTED_TYPES.has(t)) return t;
+  return "image/jpeg";
+}
+
 export default function UploadPage() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -22,13 +37,25 @@ export default function UploadPage() {
 
   async function onFile(f: File) {
     setErr(null);
+    const raw = f.type?.toLowerCase() || "";
+    if (
+      raw.includes("heic") ||
+      raw.includes("heif") ||
+      f.name.toLowerCase().endsWith(".heic") ||
+      f.name.toLowerCase().endsWith(".heif")
+    ) {
+      setErr(
+        "HEIC/HEIF is not supported. Please convert to JPG first (Preview → File → Export as JPEG), or take a screenshot of the receipt instead."
+      );
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const url = reader.result as string;
       setPreview(url);
       const data = url.split(",")[1] ?? "";
       setBase64(data);
-      setMimeType(f.type || "image/jpeg");
+      setMimeType(normalizeMime(raw));
     };
     reader.readAsDataURL(f);
   }
@@ -52,23 +79,23 @@ export default function UploadPage() {
     <Screen nav={false}>
       <TopBar showBack title="New receipt" />
 
-      <div className="px-6 mt-2">
-        <p className="text-body text-[var(--ink-800)]">
-          Take a clear photo or upload a screenshot. I&apos;ll auto-read every
-          line, detect the store, and build your checklist.
+      <div className="px-6 mt-1">
+        <p className="text-body text-[var(--ink-50)]">
+          Take a clear photo or upload a screenshot. I&apos;ll parse every line
+          and build your checklist.
         </p>
       </div>
 
       <div className="px-6 mt-6">
         {!preview ? (
-          <div className="aspect-[3/4] ink-border rounded-[16px] bg-[var(--ink-100)] flex items-center justify-center">
-            <div className="text-center">
-              <div className="inline-flex w-16 h-16 rounded-[16px] ink-border bg-white items-center justify-center">
-                <CameraIcon size={28} />
+          <div className="aspect-[3/4] rounded-[var(--radius-2xl)] bg-white border border-dashed border-[var(--ink-15)] flex items-center justify-center">
+            <div className="text-center px-6">
+              <div className="inline-flex w-16 h-16 rounded-[16px] bg-[var(--ink-04)] items-center justify-center">
+                <CameraIcon size={28} className="text-[var(--ink-30)]" />
               </div>
-              <p className="text-h3 mt-4">No photo yet</p>
-              <p className="text-meta text-[var(--ink-800)] mt-1">
-                Pick a source below
+              <p className="text-h3 mt-4 text-[var(--ink-50)]">No photo yet</p>
+              <p className="text-meta text-[var(--ink-30)] mt-1">
+                Supported: JPG, PNG, WebP, GIF
               </p>
             </div>
           </div>
@@ -78,7 +105,7 @@ export default function UploadPage() {
             <img
               src={preview}
               alt="Receipt preview"
-              className="w-full max-h-[62vh] object-contain rounded-[16px] ink-border bg-white"
+              className="w-full max-h-[62vh] object-contain rounded-[var(--radius-2xl)] bg-white border border-[var(--ink-15)] shadow-[var(--shadow-card)]"
             />
             <button
               onClick={() => {
@@ -87,10 +114,10 @@ export default function UploadPage() {
                 if (fileRef.current) fileRef.current.value = "";
                 if (cameraRef.current) cameraRef.current.value = "";
               }}
-              className="absolute top-3 right-3 w-10 h-10 rounded-full ink-border bg-white ink-shadow flex items-center justify-center"
+              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur border border-[var(--ink-15)] shadow-[var(--shadow-sm)] flex items-center justify-center transition-transform active:scale-95"
               aria-label="Remove"
             >
-              <XIcon />
+              <XIcon size={18} />
             </button>
           </div>
         )}
@@ -98,9 +125,9 @@ export default function UploadPage() {
 
       {err && (
         <div className="px-6 mt-4">
-          <Card color="red" padded>
-            <p className="text-h3">Parse failed</p>
-            <p className="text-meta mt-1">{err}</p>
+          <Card color="cream" padded>
+            <p className="text-h3 text-[var(--terracotta)]">Upload issue</p>
+            <p className="text-meta text-[var(--ink-50)] mt-1">{err}</p>
           </Card>
         </div>
       )}
@@ -112,7 +139,7 @@ export default function UploadPage() {
             size="md"
             onClick={() => cameraRef.current?.click()}
           >
-            <CameraIcon size={20} />
+            <CameraIcon size={18} />
             Camera
           </Button>
           <Button
@@ -120,7 +147,7 @@ export default function UploadPage() {
             size="md"
             onClick={() => fileRef.current?.click()}
           >
-            <UploadIcon size={20} />
+            <UploadIcon size={18} />
             Upload
           </Button>
         </div>
@@ -139,7 +166,7 @@ export default function UploadPage() {
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept={ACCEPT}
         className="hidden"
         onChange={(e) => {
           const f = e.target.files?.[0];
@@ -149,7 +176,7 @@ export default function UploadPage() {
       <input
         ref={cameraRef}
         type="file"
-        accept="image/*"
+        accept={ACCEPT}
         capture="environment"
         className="hidden"
         onChange={(e) => {
@@ -158,7 +185,7 @@ export default function UploadPage() {
         }}
       />
 
-      <div className="h-10" />
+      <div className="h-8" />
     </Screen>
   );
 }

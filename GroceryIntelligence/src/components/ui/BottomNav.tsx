@@ -14,8 +14,8 @@ const tabs = [
 export function BottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white ink-shadow-top safe-area-bottom z-30">
-      <div className="flex items-center justify-around px-4 py-3">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-[var(--cream)]/95 backdrop-blur-md border-t border-[var(--ink-15)] safe-area-bottom z-30">
+      <div className="flex items-center justify-around px-2 py-2.5">
         {tabs.map(({ href, label, Icon }) => {
           const active =
             href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -23,14 +23,14 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2 px-3 py-2 rounded-[14px] transition-colors ${
-                active ? "bg-[var(--ink-100)]" : ""
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-[12px] transition-colors duration-200 ${
+                active
+                  ? "text-[var(--terracotta)]"
+                  : "text-[var(--ink-50)] hover:text-[var(--ink-80)]"
               }`}
             >
-              <Icon size={22} className="text-ink" />
-              {active && (
-                <span className="text-[13px] font-extrabold text-ink">{label}</span>
-              )}
+              <Icon size={22} />
+              <span className="text-[11px] font-semibold tracking-[0.02em]">{label}</span>
             </Link>
           );
         })}

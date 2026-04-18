@@ -12,6 +12,7 @@ import { TopBar } from "@/components/ui/TopBar";
 import { ChevronDownIcon } from "@/components/Icon";
 import {
   CATEGORIES,
+  PACKAGE_UNITS,
   VOLUME_UNITS,
   WEIGHT_UNITS,
   type Category,
@@ -40,6 +41,9 @@ export default function ReviewPage() {
     setRows(
       parsed.items.map((p, i) => ({
         ...p,
+        packageSize: p.packageSize ?? 1,
+        packageSizeUnit: p.packageSizeUnit ?? "each",
+        packageSizeRaw: p.packageSizeRaw ?? `1 ${p.packageSizeUnit ?? "each"}`,
         key: `${i}-${p.rawText}`,
         include: true,
       }))
@@ -77,9 +81,9 @@ export default function ReviewPage() {
       <Screen nav={false}>
         <TopBar showBack title="Review" />
         <div className="px-6 mt-4 space-y-3">
-          <div className="skeleton h-[80px] ink-border rounded-[16px]" />
-          <div className="skeleton h-[80px] ink-border rounded-[16px]" />
-          <div className="skeleton h-[80px] ink-border rounded-[16px]" />
+          <div className="skeleton h-[80px] rounded-[var(--radius-xl)]" />
+          <div className="skeleton h-[80px] rounded-[var(--radius-xl)]" />
+          <div className="skeleton h-[80px] rounded-[var(--radius-xl)]" />
         </div>
       </Screen>
     );
@@ -90,37 +94,35 @@ export default function ReviewPage() {
       <TopBar showBack title="Checklist" />
 
       <div className="px-6 space-y-3">
-        <Card color="muted" className="flex items-center gap-3">
-          <div>
-            <p className="text-caption text-[var(--ink-300)]">Store</p>
-            <Input
-              value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
-              className="!h-11 !text-[15px]"
-            />
-          </div>
-        </Card>
+        <div className="rounded-[var(--radius-lg)] bg-white border border-[var(--ink-15)] p-4">
+          <p className="text-caption text-[var(--ink-30)] mb-2">Store</p>
+          <Input
+            value={storeName}
+            onChange={(e) => setStoreName(e.target.value)}
+            className="!h-10"
+          />
+        </div>
 
-        <Card color="muted">
-          <p className="text-caption text-[var(--ink-300)]">Purchase date</p>
+        <div className="rounded-[var(--radius-lg)] bg-white border border-[var(--ink-15)] p-4">
+          <p className="text-caption text-[var(--ink-30)] mb-2">Purchase date</p>
           <input
             type="date"
             value={purchaseDate}
             onChange={(e) => setPurchaseDate(e.target.value)}
-            className="mt-2 ink-border rounded-[12px] bg-white h-11 px-3 text-[15px] font-bold"
+            className="border border-[var(--ink-15)] rounded-[var(--radius-md)] bg-white h-10 px-3 text-[14px] font-medium"
           />
-        </Card>
+        </div>
       </div>
 
-      <div className="px-6 mt-6">
-        <div className="flex items-baseline justify-between mb-3">
-          <h2 className="text-h2">Items</h2>
-          <span className="text-meta text-[var(--ink-300)]">
+      <div className="px-6 mt-8">
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="text-h1">Items</h2>
+          <span className="text-meta text-[var(--ink-30)]">
             {includedCount} of {rows.length}
           </span>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 stagger">
           {rows.map((row) => (
             <ChecklistRow
               key={row.key}
@@ -135,13 +137,13 @@ export default function ReviewPage() {
         </div>
       </div>
 
-      <div className="h-[160px]" />
+      <div className="h-[140px]" />
 
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white ink-shadow-top safe-area-bottom z-20">
-        <div className="px-6 py-4 flex items-center gap-3">
+      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-[var(--cream)]/95 backdrop-blur-md border-t border-[var(--ink-15)] safe-area-bottom z-20">
+        <div className="px-6 py-4 flex items-center gap-4">
           <div className="flex-1">
-            <p className="text-caption text-[var(--ink-300)]">Subtotal</p>
-            <p className="text-h2">{formatUsd(total)}</p>
+            <p className="text-caption text-[var(--ink-30)]">Subtotal</p>
+            <p className="text-h1">{formatUsd(total)}</p>
           </div>
           <Button size="lg" onClick={onContinue} disabled={includedCount === 0}>
             Review
@@ -163,14 +165,12 @@ function ChecklistRow({
   onToggleExpand: () => void;
   onChange: (patch: Partial<ChecklistItem>) => void;
 }) {
-  const cat = row.suggestedCategory;
   return (
     <div
-      className={`ink-border ink-shadow rounded-[16px] bg-white transition-opacity ${
-        row.include ? "" : "opacity-50"
-      }`}
+      className={`rounded-[var(--radius-xl)] bg-white border border-[var(--ink-15)] shadow-[var(--shadow-sm)] transition-opacity duration-200 ${
+        row.include ? "" : "opacity-40"
+      } animate-fade-in-up opacity-0`}
     >
-      {/* Compact row */}
       <div className="p-4 flex items-center gap-3">
         <Toggle
           checked={row.include}
@@ -185,23 +185,28 @@ function ChecklistRow({
           <div className="flex items-center gap-2 min-w-0">
             <p className="text-h3 truncate">{row.suggestedName}</p>
             {row.organic && (
-              <span className="shrink-0 text-[10px] font-extrabold px-2 py-[2px] rounded-full bg-[var(--accent-green)] text-ink ink-border">
+              <span className="shrink-0 text-[10px] font-semibold px-2 py-[2px] rounded-full bg-[var(--sage-light)] text-[var(--sage)]">
                 ORG
               </span>
             )}
             {row.frozen && (
-              <span className="shrink-0 text-[10px] font-extrabold px-2 py-[2px] rounded-full bg-[var(--accent-blue)] text-white ink-border">
+              <span className="shrink-0 text-[10px] font-semibold px-2 py-[2px] rounded-full bg-blue-50 text-blue-600">
                 FRZ
               </span>
             )}
+            {row.canned && (
+              <span className="shrink-0 text-[10px] font-semibold px-2 py-[2px] rounded-full bg-[var(--amber-light)] text-[var(--amber)]">
+                CAN
+              </span>
+            )}
             {row.bulk && (
-              <span className="shrink-0 text-[10px] font-extrabold px-2 py-[2px] rounded-full bg-[var(--accent-yellow)] text-ink ink-border">
+              <span className="shrink-0 text-[10px] font-semibold px-2 py-[2px] rounded-full bg-[var(--ink-04)] text-[var(--ink-50)]">
                 BULK
               </span>
             )}
           </div>
-          <p className="text-meta text-[var(--ink-800)] truncate mt-1">
-            {row.packageSizeRaw ?? "—"} · {cat}
+          <p className="text-meta text-[var(--ink-50)] truncate mt-0.5">
+            {row.packageSizeRaw ?? "—"} · {row.suggestedCategory}
           </p>
         </button>
         <div className="text-right shrink-0">
@@ -210,16 +215,15 @@ function ChecklistRow({
             type="button"
             onClick={onToggleExpand}
             aria-label="Edit details"
-            className="mt-1 inline-flex items-center gap-1 text-meta text-[var(--ink-800)]"
+            className="mt-0.5 inline-flex items-center gap-1 text-meta text-[var(--terracotta)]"
           >
-            edit <ChevronDownIcon size={16} />
+            edit <ChevronDownIcon size={14} className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
           </button>
         </div>
       </div>
 
-      {/* Expanded editor */}
       {expanded && (
-        <div className="border-t-2 border-ink p-4 space-y-4 animate-fade-in-up">
+        <div className="border-t border-[var(--ink-15)] p-4 space-y-4 animate-fade-in">
           <FieldLabel>Item name</FieldLabel>
           <Input
             value={row.suggestedName}
@@ -227,7 +231,7 @@ function ChecklistRow({
           />
 
           <FieldLabel>Category</FieldLabel>
-          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
             {CATEGORIES.map((c) => (
               <Chip
                 key={c}
@@ -240,22 +244,29 @@ function ChecklistRow({
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            <div className="flex items-center justify-between">
               <FieldLabel>Organic</FieldLabel>
               <Toggle
                 checked={row.organic}
                 onChange={(v) => onChange({ organic: v })}
               />
             </div>
-            <div>
+            <div className="flex items-center justify-between">
               <FieldLabel>Frozen</FieldLabel>
               <Toggle
                 checked={row.frozen}
                 onChange={(v) => onChange({ frozen: v })}
               />
             </div>
-            <div>
+            <div className="flex items-center justify-between">
+              <FieldLabel>Canned</FieldLabel>
+              <Toggle
+                checked={row.canned}
+                onChange={(v) => onChange({ canned: v })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
               <FieldLabel>Bulk</FieldLabel>
               <Toggle
                 checked={row.bulk}
@@ -303,14 +314,18 @@ function ChecklistRow({
           </div>
 
           <FieldLabel>Total paid</FieldLabel>
-          <Input
-            type="number"
-            step="0.01"
-            value={row.totalPrice}
-            onChange={(e) =>
-              onChange({ totalPrice: parseFloat(e.target.value) || 0 })
-            }
-          />
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[15px] font-medium text-[var(--ink-50)]">$</span>
+            <Input
+              type="number"
+              step="0.01"
+              value={row.totalPrice}
+              className="!pl-8"
+              onChange={(e) =>
+                onChange({ totalPrice: parseFloat(e.target.value) || 0 })
+              }
+            />
+          </div>
         </div>
       )}
     </div>
@@ -318,13 +333,13 @@ function ChecklistRow({
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-caption text-[var(--ink-300)]">{children}</p>;
+  return <p className="text-caption text-[var(--ink-30)] mb-1.5">{children}</p>;
 }
 
 function UnitSelector({ value, onChange }: { value: Unit; onChange: (u: Unit) => void }) {
-  const all: Unit[] = [...WEIGHT_UNITS, ...VOLUME_UNITS, "count"];
+  const all: Unit[] = [...WEIGHT_UNITS, ...VOLUME_UNITS, ...PACKAGE_UNITS];
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {all.map((u) => (
         <Chip key={u} size="sm" active={value === u} onClick={() => onChange(u)}>
           {u}

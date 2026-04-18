@@ -29,10 +29,11 @@ export const CATEGORIES: Category[] = [
   "Other",
 ];
 
-export type Unit = "g" | "oz" | "lb" | "kg" | "ml" | "L" | "fl_oz" | "count";
+export type Unit = "g" | "oz" | "lb" | "kg" | "ml" | "L" | "fl_oz" | "count" | "pack" | "box" | "bunch" | "bag" | "each";
 
 export const WEIGHT_UNITS: Unit[] = ["g", "oz", "lb", "kg"];
 export const VOLUME_UNITS: Unit[] = ["ml", "L", "fl_oz"];
+export const PACKAGE_UNITS: Unit[] = ["pack", "box", "bunch", "bag", "each", "count"];
 
 /** Row from the `items` tab — master item registry. */
 export type Item = {
@@ -58,6 +59,7 @@ export type PriceEntry = {
   purchaseDate: string; // ISO date (YYYY-MM-DD)
   organic: boolean;
   frozen: boolean;
+  canned: boolean;
   bulk: boolean;
   brand: string | null;
   packageSize: number; // in the locked unit
@@ -87,6 +89,7 @@ export type ParsedReceiptItem = {
   suggestedCategory: Category;
   organic: boolean;
   frozen: boolean;
+  canned: boolean;
   brand: string | null;
   packageSize: number | null;
   packageSizeUnit: Unit | null;

@@ -2,8 +2,6 @@
 
 import {
   CartesianGrid,
-  Dot,
-  DotProps,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -27,43 +25,44 @@ export function PriceChart({
 }) {
   if (data.length === 0) {
     return (
-      <div className="h-[200px] ink-border rounded-[14px] bg-[var(--ink-100)] flex items-center justify-center">
-        <p className="text-meta text-[var(--ink-800)]">Not enough data yet.</p>
+      <div className="h-[200px] rounded-[var(--radius-lg)] bg-white border border-[var(--ink-15)] flex items-center justify-center">
+        <p className="text-meta text-[var(--ink-30)]">Not enough data yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[220px] ink-border rounded-[14px] bg-white p-3">
+    <div className="h-[220px] rounded-[var(--radius-lg)] bg-white border border-[var(--ink-15)] shadow-[var(--shadow-sm)] p-3">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
         >
-          <CartesianGrid stroke="#EEEFF4" strokeDasharray="2 4" />
+          <CartesianGrid stroke="#EEEAE4" strokeDasharray="3 6" />
           <XAxis
             dataKey="date"
-            tick={{ fill: "#474A57", fontSize: 11, fontWeight: 700 }}
+            tick={{ fill: "#8A837B", fontSize: 11, fontWeight: 500 }}
             tickFormatter={(d: string) => d.slice(5)}
-            stroke="#18191F"
-            strokeWidth={2}
+            stroke="#DDD8D2"
+            strokeWidth={1}
           />
           <YAxis
-            tick={{ fill: "#474A57", fontSize: 11, fontWeight: 700 }}
-            stroke="#18191F"
-            strokeWidth={2}
+            tick={{ fill: "#8A837B", fontSize: 11, fontWeight: 500 }}
+            stroke="#DDD8D2"
+            strokeWidth={1}
             tickFormatter={(v: number) => `$${v.toFixed(2)}`}
             width={46}
           />
           <Tooltip
             contentStyle={{
               background: "white",
-              border: "2px solid #18191F",
+              border: "1px solid #DDD8D2",
               borderRadius: 12,
-              fontWeight: 700,
-              boxShadow: "0 2px 0 #18191F",
+              fontWeight: 500,
+              boxShadow: "0 4px 12px rgba(26,26,26,0.06)",
+              fontSize: 13,
             }}
-            labelStyle={{ color: "#18191F", fontWeight: 800 }}
+            labelStyle={{ color: "#1A1A1A", fontWeight: 600 }}
             formatter={(v, _n, p) => {
               const storeName = (p.payload as Point).storeName;
               const num = typeof v === "number" ? v : Number(v);
@@ -73,28 +72,13 @@ export function PriceChart({
           <Line
             type="monotone"
             dataKey="unitPrice"
-            stroke="#18191F"
-            strokeWidth={2.5}
-            dot={<InkDot />}
-            activeDot={{ r: 6, stroke: "#18191F", strokeWidth: 2, fill: "#FFBD12" }}
+            stroke="#C84B31"
+            strokeWidth={2}
+            dot={{ r: 3.5, fill: "white", stroke: "#C84B31", strokeWidth: 2 }}
+            activeDot={{ r: 5, stroke: "#C84B31", strokeWidth: 2, fill: "#FFF0EC" }}
           />
         </LineChart>
       </ResponsiveContainer>
     </div>
-  );
-}
-
-function InkDot(props: DotProps) {
-  const { cx, cy } = props;
-  if (cx == null || cy == null) return null;
-  return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={4}
-      fill="white"
-      stroke="#18191F"
-      strokeWidth={2}
-    />
   );
 }

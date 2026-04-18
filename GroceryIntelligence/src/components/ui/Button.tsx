@@ -10,9 +10,9 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const sizeCls: Record<Size, string> = {
-  sm: "h-10 px-4 text-[13px] rounded-[12px]",
-  md: "h-12 px-5 text-[15px] rounded-[14px]",
-  lg: "h-[60px] px-6 text-[17px] rounded-[16px]",
+  sm: "h-10 px-5 text-[13px] rounded-[10px]",
+  md: "h-12 px-6 text-[14px] rounded-[12px]",
+  lg: "h-[54px] px-7 text-[15px] rounded-[14px]",
 };
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
@@ -20,15 +20,15 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   ref
 ) {
   const base =
-    "ink-border ink-shadow ink-press inline-flex items-center justify-center gap-2 font-extrabold select-none";
+    "inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.01em] select-none transition-all duration-200";
   const color =
     variant === "fill"
-      ? "bg-ink text-white"
+      ? "bg-[var(--ink)] text-white hover:bg-[var(--ink-80)] active:scale-[0.98]"
       : variant === "outline"
-      ? "bg-white text-ink"
-      : "bg-transparent text-ink border-transparent shadow-none";
+      ? "bg-white text-[var(--ink)] border-2 border-[var(--ink-15)] hover:border-[var(--ink-30)] hover:bg-[var(--ink-04)] active:scale-[0.98]"
+      : "bg-transparent text-[var(--ink-80)] hover:text-[var(--ink)] hover:bg-[var(--ink-04)]";
   const width = block ? "w-full" : "";
-  const dis = disabled ? "opacity-40 pointer-events-none" : "";
+  const dis = disabled ? "opacity-35 pointer-events-none" : "";
   return (
     <button
       ref={ref}

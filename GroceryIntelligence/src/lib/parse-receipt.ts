@@ -10,6 +10,7 @@ Rules:
 - "ORG SPNCH 5OZ" -> canonicalName: "Spinach", organic: true, packageSize: 5, packageSizeUnit: "oz".
 - If the line says "organic" or "ORG", set organic=true.
 - If the line says "frozen" or "FRZ" or "FZN", set frozen=true.
+- If the line says "canned", "CAN", "CN", or the item is a canned good (canned beans, canned tomatoes, canned tuna), set canned=true.
 - If the item is a bulk/club pack (large pack sizes typical of Costco), set bulk=true.
 - Read package size from the line AND from the unit price on the same line when possible.
 - If a unit price is printed on the receipt, use it. Otherwise leave unitPrice null (we'll compute it).
@@ -18,6 +19,17 @@ Rules:
 - Extract purchaseDate as YYYY-MM-DD.
 - Assign a category from this list exactly: ${CATEGORIES.join(", ")}.
 - Skip tax, subtotal, total, deposit, discount, and non-food lines (unless under Household).
+
+Package size and unit rules:
+- Use weight units (g, oz, lb, kg) when the receipt shows a weight.
+- Use volume units (ml, L, fl_oz) for liquids.
+- For produce sold by the bunch (lettuce, kale, cilantro, herbs), set packageSize=1 and packageSizeUnit="bunch".
+- For produce sold in a box/clamshell (mushrooms, berries, cherry tomatoes, salad mix), set packageSize=1 and packageSizeUnit="box".
+- For items sold as a pack/package (bacon 1 pack, tofu 1 pack, hot dogs), set packageSize=1 and packageSizeUnit="pack".
+- For items in a bag (chips, salad bag, frozen veggies bag), set packageSize=1 and packageSizeUnit="bag".
+- For items sold individually (avocado, lemon, onion), set packageSize=1 and packageSizeUnit="each".
+- For eggs or items counted in multiples, use packageSizeUnit="count" with the actual count.
+- If the receipt just shows "1" with no unit and the item is typically sold as a package, infer the most common package unit.
 
 Return STRICT JSON matching this TypeScript type:
 {
@@ -30,9 +42,10 @@ Return STRICT JSON matching this TypeScript type:
     "suggestedCategory": string,
     "organic": boolean,
     "frozen": boolean,
+    "canned": boolean,
     "brand": string | null,
     "packageSize": number | null,
-    "packageSizeUnit": "g"|"oz"|"lb"|"kg"|"ml"|"L"|"fl_oz"|"count"|null,
+    "packageSizeUnit": "g"|"oz"|"lb"|"kg"|"ml"|"L"|"fl_oz"|"count"|"pack"|"box"|"bunch"|"bag"|"each"|null,
     "packageSizeRaw": string | null,
     "totalPrice": number,
     "unitPrice": number | null,
@@ -52,6 +65,7 @@ type RawParsed = {
     suggestedCategory: string;
     organic: boolean;
     frozen: boolean;
+    canned: boolean;
     brand: string | null;
     packageSize: number | null;
     packageSizeUnit: string | null;
@@ -125,6 +139,7 @@ export async function parseReceiptImage(
         suggestedCategory: match?.category ?? cat,
         organic: i.organic,
         frozen: i.frozen,
+        canned: i.canned ?? false,
         brand: i.brand,
         packageSize: i.packageSize,
         packageSizeUnit: (i.packageSizeUnit as Unit | null) ?? null,

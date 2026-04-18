@@ -1,30 +1,34 @@
 import { HTMLAttributes, forwardRef } from "react";
 
 type Props = HTMLAttributes<HTMLDivElement> & {
-  color?: "white" | "yellow" | "red" | "blue" | "green" | "ink" | "muted";
+  color?: "white" | "cream" | "dark" | "terracotta" | "sage" | "amber" | "muted";
   padded?: boolean;
+  hoverable?: boolean;
 };
 
 const bg: Record<NonNullable<Props["color"]>, string> = {
-  white: "bg-white text-ink",
-  yellow: "bg-[var(--accent-yellow)] text-ink",
-  red: "bg-[var(--accent-red)] text-white",
-  blue: "bg-[var(--accent-blue)] text-white",
-  green: "bg-[var(--accent-green)] text-ink",
-  ink: "bg-ink text-white",
-  muted: "bg-[var(--ink-100)] text-ink",
+  white: "bg-white text-[var(--ink)]",
+  cream: "bg-[var(--ink-04)] text-[var(--ink)]",
+  dark: "bg-[var(--ink)] text-white",
+  terracotta: "bg-[var(--terracotta)] text-white",
+  sage: "bg-[var(--sage-light)] text-[var(--ink)]",
+  amber: "bg-[var(--amber-light)] text-[var(--ink)]",
+  muted: "bg-[var(--ink-04)] text-[var(--ink)]",
 };
 
 export const Card = forwardRef<HTMLDivElement, Props>(function Card(
-  { color = "white", padded = true, className = "", children, ...rest },
+  { color = "white", padded = true, hoverable, className = "", children, ...rest },
   ref
 ) {
+  const hover = hoverable
+    ? "transition-shadow duration-200 hover:shadow-[var(--shadow-card-hover)]"
+    : "";
   return (
     <div
       ref={ref}
-      className={`ink-border ink-shadow rounded-[16px] ${bg[color]} ${
+      className={`rounded-[var(--radius-xl)] border border-[var(--ink-15)] shadow-[var(--shadow-card)] ${bg[color]} ${
         padded ? "p-5" : ""
-      } ${className}`}
+      } ${hover} ${className}`}
       {...rest}
     >
       {children}

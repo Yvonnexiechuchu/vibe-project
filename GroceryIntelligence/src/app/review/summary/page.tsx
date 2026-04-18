@@ -67,21 +67,17 @@ export default function SummaryPage() {
     return (
       <Screen nav={false}>
         <TopBar title="Saved" />
-        <div className="px-6 mt-6">
-          <Card color="green" padded>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full ink-border bg-white flex items-center justify-center">
-                <CheckIcon />
-              </div>
-              <div>
-                <p className="text-h2">Got it.</p>
-                <p className="text-meta mt-1">
-                  {savedCount} item{savedCount === 1 ? "" : "s"} logged to your Sheet.
-                </p>
-              </div>
+        <div className="px-6 mt-10 animate-fade-in-up">
+          <div className="text-center mb-8">
+            <div className="inline-flex w-20 h-20 rounded-full bg-[var(--sage-light)] items-center justify-center mb-4">
+              <CheckIcon size={32} className="text-[var(--sage)]" />
             </div>
-          </Card>
-          <div className="mt-6 flex flex-col gap-3">
+            <h2 className="text-h1">All set.</h2>
+            <p className="text-body text-[var(--ink-50)] mt-2">
+              {savedCount} item{savedCount === 1 ? "" : "s"} logged to your database.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
             <Button
               size="lg"
               block
@@ -114,33 +110,34 @@ export default function SummaryPage() {
       <TopBar showBack title="Confirm" />
 
       <div className="px-6">
-        <Card color="yellow" padded>
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-[14px] ink-border bg-white flex items-center justify-center shrink-0">
-              <StoreIcon />
+        <div className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--ink)] p-6">
+          <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-[var(--amber)] opacity-15" />
+          <div className="relative flex items-start gap-4">
+            <div className="w-12 h-12 rounded-[14px] bg-white/10 flex items-center justify-center shrink-0">
+              <StoreIcon className="text-white" />
             </div>
-            <div className="flex-1">
-              <p className="text-caption text-[var(--ink-800)]">{parsed.purchaseDate}</p>
-              <p className="text-h2">{parsed.storeName}</p>
-              <p className="text-meta mt-1">
+            <div className="flex-1 text-white">
+              <p className="text-caption text-white/50">{parsed.purchaseDate}</p>
+              <p className="text-h1 text-white mt-1">{parsed.storeName}</p>
+              <p className="text-meta text-white/60 mt-1">
                 {included.length} items · {formatUsd(total)}
               </p>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       <div className="px-6 mt-6">
-        <h2 className="text-h2">Items to save</h2>
-        <div className="mt-3 flex flex-col gap-2">
+        <h2 className="text-h2 mb-3">Items to save</h2>
+        <div className="flex flex-col gap-2 stagger">
           {included.map((i, idx) => (
             <div
               key={idx}
-              className="ink-border rounded-[14px] bg-white px-4 py-3 flex items-center gap-3"
+              className="rounded-[var(--radius-lg)] bg-white border border-[var(--ink-15)] px-4 py-3.5 flex items-center gap-3 animate-fade-in-up opacity-0"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-body truncate">{i.suggestedName}</p>
-                <p className="text-meta text-[var(--ink-800)] truncate">
+                <p className="text-h3 truncate">{i.suggestedName}</p>
+                <p className="text-meta text-[var(--ink-50)] truncate">
                   {i.packageSizeRaw ?? "—"} · {i.suggestedCategory}
                 </p>
               </div>
@@ -152,23 +149,18 @@ export default function SummaryPage() {
 
       {err && (
         <div className="px-6 mt-4">
-          <Card color="red" padded>
-            <p className="text-h3">Save failed</p>
-            <p className="text-meta mt-1">{err}</p>
+          <Card color="cream" padded>
+            <p className="text-h3 text-[var(--terracotta)]">Save failed</p>
+            <p className="text-meta text-[var(--ink-50)] mt-1">{err}</p>
           </Card>
         </div>
       )}
 
-      <div className="h-[120px]" />
+      <div className="h-[100px]" />
 
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white ink-shadow-top safe-area-bottom z-20">
+      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-[var(--cream)]/95 backdrop-blur-md border-t border-[var(--ink-15)] safe-area-bottom z-20">
         <div className="px-6 py-4">
-          <Button
-            size="lg"
-            block
-            disabled={!canSave}
-            onClick={onConfirm}
-          >
+          <Button size="lg" block disabled={!canSave} onClick={onConfirm}>
             {status === "saving" ? "Saving…" : "Save to database"}
           </Button>
         </div>

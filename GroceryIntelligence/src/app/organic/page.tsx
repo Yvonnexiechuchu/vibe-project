@@ -42,23 +42,22 @@ export default function OrganicPage() {
       <TopBar showBack title="Is organic worth it?" />
 
       <div className="px-6">
-        <Card color="green">
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-[14px] ink-border bg-white flex items-center justify-center shrink-0">
-              <LeafIcon />
+        <div className="rounded-[var(--radius-2xl)] bg-[var(--sage-light)] border border-[var(--sage)]/15 p-5">
+          <div className="flex items-start gap-3.5">
+            <div className="w-11 h-11 rounded-[12px] bg-white flex items-center justify-center shrink-0">
+              <LeafIcon size={20} className="text-[var(--sage)]" />
             </div>
             <div>
               <p className="text-h3">Pick a food category</p>
-              <p className="text-meta mt-1 text-[var(--ink-800)]">
-                I&apos;ll pull real-source research. Cached quarterly to stay
-                token-light.
+              <p className="text-meta text-[var(--ink-50)] mt-1">
+                Real-source research, cached quarterly.
               </p>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
-      <div className="mt-4 px-6 flex flex-wrap gap-2">
+      <div className="mt-5 px-6 flex flex-wrap gap-2">
         {CATEGORIES.map((c) => (
           <Chip size="sm" key={c} active={cat === c} onClick={() => selectCategory(c)}>
             {c}
@@ -69,54 +68,47 @@ export default function OrganicPage() {
       <div className="px-6 mt-6">
         {loading && (
           <div className="space-y-3">
-            <div className="skeleton h-24 ink-border rounded-[16px]" />
-            <div className="skeleton h-24 ink-border rounded-[16px]" />
+            <div className="skeleton h-24 rounded-[var(--radius-xl)]" />
+            <div className="skeleton h-24 rounded-[var(--radius-xl)]" />
           </div>
         )}
         {err && (
-          <Card color="red" padded>
-            <p className="text-h3">Can&apos;t load research</p>
-            <p className="text-meta mt-1">{err}</p>
+          <Card color="cream" padded>
+            <p className="text-h3 text-[var(--terracotta)]">Can&apos;t load research</p>
+            <p className="text-meta text-[var(--ink-50)] mt-1">{err}</p>
           </Card>
         )}
         {research && (
-          <div className="space-y-4 animate-fade-in-up">
-            <Card padded>
-              <p className="text-caption text-[var(--ink-300)]">Takeaway</p>
-              <p className="text-body mt-1">{research.summary}</p>
+          <div className="space-y-3 animate-fade-in-up stagger">
+            <Card padded className="animate-fade-in-up opacity-0">
+              <p className="text-caption text-[var(--ink-30)] mb-2">Takeaway</p>
+              <p className="text-body leading-relaxed">{research.summary}</p>
             </Card>
 
             {research.keyDifferences && (
-              <Card padded>
-                <p className="text-caption text-[var(--ink-300)]">
-                  Key differences
-                </p>
-                <p className="text-meta mt-2 whitespace-pre-line">
+              <Card padded className="animate-fade-in-up opacity-0">
+                <p className="text-caption text-[var(--ink-30)] mb-2">Key differences</p>
+                <p className="text-meta text-[var(--ink-80)] whitespace-pre-line leading-relaxed">
                   {research.keyDifferences}
                 </p>
               </Card>
             )}
 
             {research.pesticideImpact && (
-              <Card padded>
-                <p className="text-caption text-[var(--ink-300)]">Pesticides</p>
-                <p className="text-meta mt-2">{research.pesticideImpact}</p>
+              <Card padded className="animate-fade-in-up opacity-0">
+                <p className="text-caption text-[var(--ink-30)] mb-2">Pesticides</p>
+                <p className="text-meta text-[var(--ink-80)] leading-relaxed">{research.pesticideImpact}</p>
               </Card>
             )}
 
             {sources.length > 0 && (
-              <Card padded>
-                <p className="text-caption text-[var(--ink-300)]">Sources</p>
-                <ul className="mt-2 space-y-1">
+              <Card padded className="animate-fade-in-up opacity-0">
+                <p className="text-caption text-[var(--ink-30)] mb-2">Sources</p>
+                <ul className="space-y-1">
                   {sources.map((s, i) => (
-                    <li key={i} className="text-meta">
+                    <li key={i} className="text-meta text-[var(--ink-50)]">
                       {s.url ? (
-                        <a
-                          href={s.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="underline"
-                        >
+                        <a href={s.url} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-[var(--ink)]">
                           {s.title}
                         </a>
                       ) : (
@@ -127,7 +119,7 @@ export default function OrganicPage() {
                     </li>
                   ))}
                 </ul>
-                <p className="text-caption text-[var(--ink-300)] mt-3">
+                <p className="text-caption text-[var(--ink-30)] mt-3">
                   Refreshed {research.refreshedAt.slice(0, 10)}
                 </p>
               </Card>
@@ -135,12 +127,12 @@ export default function OrganicPage() {
           </div>
         )}
         {!loading && !research && !cat && (
-          <p className="text-body text-[var(--ink-800)] text-center py-12">
+          <p className="text-body text-[var(--ink-30)] text-center py-16">
             Tap a category to see the evidence.
           </p>
         )}
       </div>
-      <div className="h-10" />
+      <div className="h-8" />
     </Screen>
   );
 }

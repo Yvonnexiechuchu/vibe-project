@@ -9,7 +9,7 @@ type IconProps = {
   strokeWidth?: number;
 };
 
-const base = (size: number, strokeWidth: number) => ({
+const base = (size: number, strokeWidth: number = 1.75) => ({
   width: size,
   height: size,
   viewBox: "0 0 24 24",

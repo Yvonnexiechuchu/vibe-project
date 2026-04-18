@@ -113,6 +113,7 @@ export async function POST(req: NextRequest) {
         purchaseDate: body.purchaseDate,
         organic: row.organic,
         frozen: row.frozen,
+        canned: row.canned ?? false,
         bulk: row.bulk,
         brand: row.brand,
         packageSize: packageSizeInLocked,

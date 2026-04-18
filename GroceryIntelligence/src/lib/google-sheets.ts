@@ -33,6 +33,7 @@ const HEADERS: Record<Tab, string[]> = {
     "purchaseDate",
     "organic",
     "frozen",
+    "canned",
     "bulk",
     "brand",
     "packageSize",
@@ -79,16 +80,36 @@ function getClient(): { sheets: sheets_v4.Sheets; spreadsheetId: string } {
   return { sheets: cachedClient, spreadsheetId };
 }
 
+// --------- Read cache (avoid Sheets API rate limits during dev) ---------
+
+const READ_CACHE_TTL = 15_000; // 15 seconds
+const readCache = new Map<string, { data: string[][]; ts: number }>();
+
+export function invalidateReadCache(tab?: Tab) {
+  if (tab) {
+    readCache.delete(tab);
+  } else {
+    readCache.clear();
+  }
+}
+
 // --------- Low-level helpers ---------
 
 async function readRange(tab: Tab): Promise<string[][]> {
+  const hit = readCache.get(tab);
+  if (hit && Date.now() - hit.ts < READ_CACHE_TTL) {
+    return hit.data;
+  }
+
   const { sheets, spreadsheetId } = getClient();
   try {
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: `${tab}!A1:Z10000`,
     });
-    return res.data.values ?? [];
+    const data = res.data.values ?? [];
+    readCache.set(tab, { data, ts: Date.now() });
+    return data;
   } catch (err) {
     const e = err as { code?: number; message?: string };
     if (e.code === 400 || /Unable to parse range/.test(e.message ?? "")) {
@@ -99,6 +120,7 @@ async function readRange(tab: Tab): Promise<string[][]> {
 }
 
 async function appendRow(tab: Tab, row: (string | number | boolean)[]) {
+  invalidateReadCache(tab);
   const { sheets, spreadsheetId } = getClient();
   await sheets.spreadsheets.values.append({
     spreadsheetId,
@@ -109,6 +131,7 @@ async function appendRow(tab: Tab, row: (string | number | boolean)[]) {
 }
 
 async function writeRow(tab: Tab, rowNumber: number, row: (string | number | boolean)[]) {
+  invalidateReadCache(tab);
   const { sheets, spreadsheetId } = getClient();
   await sheets.spreadsheets.values.update({
     spreadsheetId,
@@ -222,14 +245,15 @@ function rowToPrice(row: string[]): PriceEntry | null {
     purchaseDate: row[3] ?? "",
     organic: row[4] === "TRUE" || row[4] === "true",
     frozen: row[5] === "TRUE" || row[5] === "true",
-    bulk: row[6] === "TRUE" || row[6] === "true",
-    brand: row[7] || null,
-    packageSize: parseFloat(row[8] ?? "0") || 0,
-    packageSizeRaw: row[9] ?? "",
-    totalPrice: parseFloat(row[10] ?? "0") || 0,
-    unitPrice: parseFloat(row[11] ?? "0") || 0,
-    receiptLineRaw: row[12] || null,
-    createdAt: row[13] ?? "",
+    canned: row[6] === "TRUE" || row[6] === "true",
+    bulk: row[7] === "TRUE" || row[7] === "true",
+    brand: row[8] || null,
+    packageSize: parseFloat(row[9] ?? "0") || 0,
+    packageSizeRaw: row[10] ?? "",
+    totalPrice: parseFloat(row[11] ?? "0") || 0,
+    unitPrice: parseFloat(row[12] ?? "0") || 0,
+    receiptLineRaw: row[13] || null,
+    createdAt: row[14] ?? "",
   };
 }
 
@@ -246,6 +270,7 @@ export async function appendPrice(p: PriceEntry): Promise<void> {
     p.purchaseDate,
     String(p.organic).toUpperCase(),
     String(p.frozen).toUpperCase(),
+    String(p.canned).toUpperCase(),
     String(p.bulk).toUpperCase(),
     p.brand ?? "",
     p.packageSize,

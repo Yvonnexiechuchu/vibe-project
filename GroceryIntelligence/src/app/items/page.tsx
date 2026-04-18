@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { Input } from "@/components/ui/Input";
 import { Screen } from "@/components/ui/Screen";
-import { TopBar } from "@/components/ui/TopBar";
 import { ChevronRightIcon, LeafIcon, SearchIcon } from "@/components/Icon";
 import { fetchSnapshot, type DataSnapshot } from "@/lib/client-api";
 import type { Category } from "@/lib/types";
@@ -32,32 +31,29 @@ export default function ItemsPage() {
         const cheapest = prices.length
           ? prices.reduce((a, b) => (a.unitPrice < b.unitPrice ? a : b))
           : null;
-        const mostRecent = prices.length
-          ? [...prices].sort((a, b) =>
-              b.purchaseDate.localeCompare(a.purchaseDate)
-            )[0]
-          : null;
         const hasOrganic = prices.some((p) => p.organic);
-        return { item, cheapest, mostRecent, count: prices.length, hasOrganic };
+        return { item, cheapest, count: prices.length, hasOrganic };
       })
       .sort((a, b) => a.item.canonicalName.localeCompare(b.item.canonicalName));
   }, [data, q, cat]);
 
   return (
     <Screen>
-      <TopBar title="Items" />
+      <div className="px-6 pt-10 pb-2 safe-area-top">
+        <h1 className="text-h1">Items</h1>
+      </div>
 
-      <div className="px-6">
+      <div className="px-6 mt-3">
         <div className="relative">
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search items"
-            className="pl-12"
+            className="pl-11"
           />
           <SearchIcon
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--ink-300)]"
-            size={20}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--ink-30)]"
+            size={18}
           />
         </div>
       </div>
@@ -73,38 +69,40 @@ export default function ItemsPage() {
         ))}
       </div>
 
-      <div className="px-6 mt-4 flex flex-col gap-2">
+      <div className="px-6 mt-5 flex flex-col gap-2 stagger">
         {data === null && (
           <>
-            <div className="skeleton h-[72px] ink-border rounded-[16px]" />
-            <div className="skeleton h-[72px] ink-border rounded-[16px]" />
-            <div className="skeleton h-[72px] ink-border rounded-[16px]" />
+            <div className="skeleton h-[72px] rounded-[var(--radius-lg)]" />
+            <div className="skeleton h-[72px] rounded-[var(--radius-lg)]" />
+            <div className="skeleton h-[72px] rounded-[var(--radius-lg)]" />
           </>
         )}
 
         {data && rows.length === 0 && (
           <div className="py-20 text-center">
-            <p className="text-h3">No items yet</p>
-            <p className="text-meta text-[var(--ink-800)] mt-2">
+            <p className="text-h2 text-[var(--ink-50)]">No items yet</p>
+            <p className="text-body text-[var(--ink-30)] mt-2">
               Upload a receipt to start building your database.
             </p>
           </div>
         )}
 
         {rows.map(({ item, cheapest, count, hasOrganic }) => (
-          <Link key={item.id} href={`/items/${item.id}`} className="block">
-            <div className="ink-border ink-shadow rounded-[16px] bg-white p-4 flex items-center gap-3 ink-press">
-              <div className="w-12 h-12 rounded-[12px] ink-border bg-[var(--ink-100)] flex items-center justify-center shrink-0 text-h3">
-                {item.canonicalName.charAt(0).toUpperCase()}
+          <Link key={item.id} href={`/items/${item.id}`} className="block animate-fade-in-up opacity-0">
+            <div className="rounded-[var(--radius-lg)] bg-white border border-[var(--ink-15)] shadow-[var(--shadow-sm)] p-4 flex items-center gap-3.5 transition-all duration-200 hover:shadow-[var(--shadow-md)] active:scale-[0.99]">
+              <div className="w-11 h-11 rounded-[10px] bg-[var(--ink-04)] flex items-center justify-center shrink-0">
+                <span className="text-h3 text-[var(--ink-50)]">
+                  {item.canonicalName.charAt(0).toUpperCase()}
+                </span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <p className="text-h3 truncate">{item.canonicalName}</p>
                   {hasOrganic && (
-                    <LeafIcon size={16} className="text-[var(--accent-green)] shrink-0" />
+                    <LeafIcon size={14} className="text-[var(--sage)] shrink-0" />
                   )}
                 </div>
-                <p className="text-meta text-[var(--ink-800)] truncate">
+                <p className="text-meta text-[var(--ink-50)] truncate mt-0.5">
                   {item.category} · {count} purchase{count === 1 ? "" : "s"}
                 </p>
               </div>
@@ -114,19 +112,19 @@ export default function ItemsPage() {
                     <p className="text-h3">
                       {formatUnitPrice(cheapest.unitPrice, item.lockedUnit)}
                     </p>
-                    <p className="text-caption text-[var(--ink-300)]">best</p>
+                    <p className="text-caption text-[var(--ink-30)]">best</p>
                   </>
                 ) : (
-                  <p className="text-meta text-[var(--ink-300)]">no data</p>
+                  <p className="text-meta text-[var(--ink-30)]">no data</p>
                 )}
               </div>
-              <ChevronRightIcon size={20} className="text-[var(--ink-300)] shrink-0" />
+              <ChevronRightIcon size={18} className="text-[var(--ink-15)] shrink-0" />
             </div>
           </Link>
         ))}
       </div>
 
-      <div className="h-10" />
+      <div className="h-8" />
     </Screen>
   );
 }

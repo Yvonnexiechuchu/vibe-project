@@ -28,7 +28,8 @@ export function convert(value: number, from: Unit, to: Unit): number | null {
   if (from in VOLUME_TO_ML && to in VOLUME_TO_ML) {
     return (value * VOLUME_TO_ML[from]) / VOLUME_TO_ML[to];
   }
-  if (from === "count" && to === "count") return value;
+  const PACKAGE = new Set(["count", "pack", "box", "bunch", "bag", "each"]);
+  if (PACKAGE.has(from) && PACKAGE.has(to)) return value;
   return null;
 }
 
